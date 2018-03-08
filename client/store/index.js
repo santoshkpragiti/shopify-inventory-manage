@@ -3,10 +3,6 @@ import thunkMiddleware from 'redux-thunk';
 import logger from 'redux-logger';
 
 const initState = {
-  requestFields,
-  requestInProgress: false,
-  requestError: null,
-  responseBody: '',
   inventory: null,
   all_inventory: null,
   message: ''

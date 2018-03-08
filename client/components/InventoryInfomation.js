@@ -12,6 +12,18 @@ import { getPresentProductsInfo } from '../actions/index';
 
 class InventoryInfomation extends React.Component{
 
+    constructor(props) {
+      super(props);
+      this.handleGetProductsInfo = this.handleGetProductsInfo.bind(this);
+    }
+
+    handleGetProductsInfo() {
+      this.props.getPresentProductsInfo((success) => {
+        if(!success) alert("有问题，无法更新");
+        else alert("更新完成")
+      })
+    }
+
     render() {
       var items = [];
       const allInventory = this.props.allInventory;
@@ -45,7 +57,7 @@ class InventoryInfomation extends React.Component{
             style={{paddingTop: 5, paddingLeft: 5}}
             primary
             label={'更新最新产品信息'}
-            onClick={this.props.getPresentProductsInfo}
+            onClick={this.handleGetProductsInfo}
           />
           <List>
             {items}
@@ -64,7 +76,7 @@ function mapStateTpProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    getPresentProductsInfo: function() { dispatch(getPresentProductsInfo()); }
+    getPresentProductsInfo: function(callback) { dispatch(getPresentProductsInfo(callback)); }
   }
 }
 

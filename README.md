@@ -17,4 +17,4 @@ Set Add HOST from your tunnel service as SHOPIFY_APP_HOST
 Add the api key from partners dash as SHOPIFY_APP_KEY
 Add the api secret from partners dash as SHOPIFY_APP_SECRET
 
-run yarn install 
+run yarn run start
