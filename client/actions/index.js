@@ -121,7 +121,7 @@ function updateToFirebase(data, expire, key, inventory) {
   }
 }
 
-function updateAllToFirebase(data, cur_products) {
+function updateAllToFirebase(data, cur_products, callback) {
   const products = data.products;
   for(let i in products) {
     for(let j in cur_products) {
@@ -155,11 +155,15 @@ function updateAllToFirebase(data, cur_products) {
     }
   }
   fireRef.child('products').update(cur_products, function(error) {
-    if(error) alert(error);
+    if(error) {
+      console.log(error);
+      callback(false);
+    }
+    else callback(true);
   });
 }
 
-export function getPresentProductsInfo(){
+export function getPresentProductsInfo(callback){
   const fetchOptions = {
     headers: {
       'Accept': 'application/json',
@@ -171,7 +175,7 @@ export function getPresentProductsInfo(){
   return function(dispatch, getState) {
     return fetch('api/products.json', fetchOptions)
       .then(response => response.json())
-      .then(json => { updateAllToFirebase(json, getState().all_inventory); })
+      .then(json => { updateAllToFirebase(json, getState().all_inventory, callback); })
       .catch(error => {alert(error)});
   }
 }

@@ -1,7 +1,6 @@
 import React, { Component} from 'react';
 import { Page } from '@shopify/polaris';
 import { EmbeddedApp } from '@shopify/polaris/embedded';
-import ApiConsole from './components/ApiConsole';
 import Admin from './components/Admin';
 
 class App extends Component {

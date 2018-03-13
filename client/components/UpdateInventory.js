@@ -77,10 +77,10 @@ class UpdateInventory extends React.Component {
     })
   }
 
-  handleSearch() {
+  handleSearch(callback) {
     const id = this.state.searchId;
     const inventory = this.props.allInventory;
-    var flag = '';
+    var flag = false;
     for(let k in inventory) {
       if(inventory[k].id == id) {
         this.setState({
@@ -109,8 +109,10 @@ class UpdateInventory extends React.Component {
           searchId: '',
           verb: 'PUT'
         });
+        flag=true;
       }
-    };
+    }
+    callback(flag);
   }
 
   handleOnChange(value, isVariant, key) {
@@ -154,7 +156,12 @@ class UpdateInventory extends React.Component {
             <RaisedButton
               primary
               label={"搜索"}
-              onClick={this.handleSearch}
+              onClick={() => {
+                this.handleSearch((success) => {
+                  if(!success) alert("没有此产品");
+                })
+                }
+              }
             />
           </div>
         }
