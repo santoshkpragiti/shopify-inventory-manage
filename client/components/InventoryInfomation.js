@@ -15,12 +15,14 @@ class InventoryInfomation extends React.Component{
     constructor(props) {
       super(props);
       this.handleGetProductsInfo = this.handleGetProductsInfo.bind(this);
+      this.state={
+        inProgress: false
+      };
     }
 
     handleGetProductsInfo() {
       this.props.getPresentProductsInfo((success) => {
         if(!success) alert("有问题，无法更新");
-        else alert("更新完成")
       })
     }
 
@@ -54,7 +56,7 @@ class InventoryInfomation extends React.Component{
       return (
         <Paper>
           <RaisedButton
-            style={{paddingTop: 5, paddingLeft: 5}}
+            style={{marginTop: 5, marginLeft: 5}}
             primary
             label={'更新最新产品信息'}
             onClick={this.handleGetProductsInfo}
