@@ -8,7 +8,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Avatar from 'material-ui/Avatar';
 import { green400, green300 } from 'material-ui/styles/colors';
 import Divider from 'material-ui/Divider';
-import { getPresentProductsInfo } from '../actions/index';
+import { getPresentProductsInfo, requestSuccessAction } from '../actions/index';
 
 class InventoryInfomation extends React.Component{
 
@@ -22,7 +22,7 @@ class InventoryInfomation extends React.Component{
 
     handleGetProductsInfo() {
       this.props.getPresentProductsInfo((success) => {
-        if(!success) alert("有问题，无法更新");
+        if(!success) this.props.gotErrorMessage('获取最新货品信息失败!');
       })
     }
 
@@ -78,7 +78,8 @@ function mapStateTpProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    getPresentProductsInfo: function(callback) { dispatch(getPresentProductsInfo(callback)); }
+    getPresentProductsInfo: function(callback) { dispatch(getPresentProductsInfo(callback)); },
+    gotErrorMessage: function(message) { dispatch(requestSuccessAction(message)) }
   }
 }
 

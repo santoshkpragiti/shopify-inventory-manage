@@ -6,7 +6,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Paper from 'material-ui/Paper';
 import { FormLayout, TextField, Popover, ActionList, Button, Stack } from '@shopify/polaris';
 
-import { addInventory } from '../actions/index';
+import { addInventory, requestSuccessAction, startListenToFB } from '../actions/index';
 
 class UpdateInventory extends React.Component {
   constructor(props) {
@@ -158,7 +158,7 @@ class UpdateInventory extends React.Component {
               label={"搜索"}
               onClick={() => {
                 this.handleSearch((success) => {
-                  if(!success) alert("没有此产品");
+                  if(!success) this.props.gotErrorMessage('没有该产品！');
                 })
                 }
               }
@@ -257,7 +257,8 @@ function mapStateTpProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     addInventory: function(inventory, expireString) { dispatch(addInventory(inventory, expireString)); },
-    startListenToFirebase: function() { dispatch(startListenToFB()); }
+    startListenToFirebase: function() { dispatch(startListenToFB()); },
+    gotErrorMessage: function(message) { dispatch(requestSuccessAction(message)) }
   }
 }
 
