@@ -10,12 +10,6 @@ const initState = {
 
 function reducer(state = initState, action) {
   switch (action.type) {
-    case 'REQUEST_ERROR':
-      return {
-        ...state,
-        requestInProgress: false,
-        requestError: action.payload.requestError,
-      };
     case 'REQUEST_SUCCESS':
         return {
           ...state,

@@ -1,14 +1,5 @@
 import { fireRef } from './firebase';
 
-function requestErrorAction(requestError) {
-  return {
-    type: 'REQUEST_ERROR',
-    payload: {
-      requestError,
-    },
-  };
-}
-
 export function requestSuccessAction(message) {
   return {
     type: 'REQUEST_SUCCESS',
@@ -47,6 +38,7 @@ export function startListenToFB() {
 }
 
 function pushToFirebase(data, expire) {
+  return function(dispatch, getState){
     const product = data.product;
     const variants = product.variants[0];
     const update = {
@@ -67,14 +59,20 @@ function pushToFirebase(data, expire) {
       expire_date: expire,
       quantity: variants.inventory_quantity,
     };
-    console.log(variantUpdate);
     const newProdKey = fireRef.child('products').push().key;
     fireRef.child('products').child(newProdKey).update(update, function(error) {
-      if(error) alert(error);
+      if(error) {
+        dispatch(requestSuccessAction("添加失败！"))
+        console.log(error);
+      };
     });
     fireRef.child('products').child(newProdKey).child('stock').push(variantUpdate, function(error) {
-      if(error) alert(error);
+      if(error) {
+        dispatch(requestSuccessAction("添加失败！"))
+        console.log(error);
+      };
     })
+  }
 }
 
 function updateToFirebase(data, expire, key, inventory) {
@@ -103,7 +101,10 @@ function updateToFirebase(data, expire, key, inventory) {
   }
   if(adjust === 0) {
     fireRef.child('products').child(key).update(update, function(error) {
-      if(error) alert(error);
+      if(error) {
+        dispatch(requestSuccessAction("更新失败！"))
+        console.log(error);
+      };
     });
   }
   else if(adjust > 0) {
@@ -113,10 +114,16 @@ function updateToFirebase(data, expire, key, inventory) {
       quantity: adjust
     };
     fireRef.child('products').child(key).update(update, function(error) {
-      if(error) alert(error);
+      if(error) {
+        dispatch(requestSuccessAction("更新失败！"))
+        console.log(error);
+      };
     });
     fireRef.child('products').child(key).child('stock').push(variantUpdate, function(error) {
-      if(error) alert(error);
+      if(error) {
+        dispatch(requestSuccessAction("更新失败！"))
+        console.log(error);
+      };
     })
   }
 }

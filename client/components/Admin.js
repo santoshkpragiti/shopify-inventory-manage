@@ -14,7 +14,12 @@ import { requestSuccessAction, startListenToFB } from '../actions/index';
 class Admin extends React.Component {
   constructor(props) {
     super(props);
+    this.handleReset = this.handleReset.bind(this);
     this.props.startListenToFirebase();
+  }
+
+  handleReset() {
+    this.props.resetSnackbar("");
   }
 
   render() {
@@ -35,7 +40,7 @@ class Admin extends React.Component {
             open={this.props.message!==""}
             message={this.props.message}
             autoHideDuration={3000}
-            onRequestClose={(empty_message) => this.props.resetSnackbar(empty_message)}
+            onRequestClose={this.handleReset}
           />
         </div>
       </MuiThemeProvider>
