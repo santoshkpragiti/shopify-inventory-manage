@@ -19,7 +19,7 @@ class UpdateInventory extends React.Component {
       inventoryInfo:{
         "id": '',
         "created_at": '',
-        "image": '',
+        "images": [],
         "product_type": '',
         "tags": '',
         "title": '',
@@ -52,7 +52,7 @@ class UpdateInventory extends React.Component {
     this.setState({
       inventoryInfo:{
         "id": '',
-        "image": '',
+        "images": [],
         "product_type": '',
         "tags": '',
         "title": '',
@@ -87,7 +87,7 @@ class UpdateInventory extends React.Component {
           inventoryInfo:{
             "id": inventory[k].id,
             "created_at": '',
-            "image": inventory[k].image || '',
+            "images": inventory[k].images || [],
             "product_type": inventory[k].type || '',
             "tags": inventory[k].tags || '',
             "title": inventory[k].name,
@@ -118,8 +118,17 @@ class UpdateInventory extends React.Component {
   handleOnChange(value, isVariant, key) {
     const obj = Object.assign({}, this.state.inventoryInfo);
     if(isVariant === false) {
-      obj[key] = value;
-      this.setState({inventoryInfo: obj});
+      if(key=='images'){
+        const image = {
+          src: value
+        };
+        obj['images'].push(image);
+        this.setState({inventoryInfo: obj});
+      }
+      else{
+        obj[key] = value;
+        this.setState({inventoryInfo: obj});
+      }
     }
     else {
       obj['variant'][key] = value;
@@ -128,6 +137,7 @@ class UpdateInventory extends React.Component {
   }
 
   render() {
+    const image = this.state.inventoryInfo.images[0] || {};
     return (
       <Paper style={{margin: '5%'}}>
         <FlatButton
@@ -175,7 +185,7 @@ class UpdateInventory extends React.Component {
               />
               <TextField
                 label={'产品图片'}
-                value={this.state.inventoryInfo['images']}
+                value={image.src}
                 onChange={value => {this.handleOnChange(value, false, 'images')}}
               />
               <TextField
