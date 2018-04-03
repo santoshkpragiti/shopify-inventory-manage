@@ -122,7 +122,8 @@ class UpdateInventory extends React.Component {
         const image = {
           src: value
         };
-        obj['images'].push(image);
+        if(obj['images'][0] === undefined) obj['images'].push(image);
+        else obj['images'][0] = image;
         this.setState({inventoryInfo: obj});
       }
       else{

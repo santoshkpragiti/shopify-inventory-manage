@@ -45,7 +45,7 @@ function pushToFirebase(data, expire) {
       name: product.title,
       id: product.id,
       variant_id: variants.id,
-      image: product.images || null,
+      images: product.images || null,
       type: product.product_type || null,
       tags: product.tags || null,
       vendor: product.vendor || null,
@@ -62,12 +62,14 @@ function pushToFirebase(data, expire) {
     const newProdKey = fireRef.child('products').push().key;
     fireRef.child('products').child(newProdKey).update(update, function(error) {
       if(error) {
+        console.log('error1');
         dispatch(requestSuccessAction("添加失败！"))
         console.log(error);
       };
     });
     fireRef.child('products').child(newProdKey).child('stock').push(variantUpdate, function(error) {
       if(error) {
+        console.log('error1');
         dispatch(requestSuccessAction("添加失败！"))
         console.log(error);
       };
@@ -76,55 +78,57 @@ function pushToFirebase(data, expire) {
 }
 
 function updateToFirebase(data, expire, key, inventory) {
-  const product = data.product;
-  const variants = product.variants[0];
-  const update = {
-    name: product.title,
-    id: product.id,
-    variant_id: variants.id,
-    image: product.images || null,
-    type: product.product_type || null,
-    tags: product.tags || null,
-    vendor: product.vendor || null,
-    weight: variants.weight || null,
-    weight_unit: variants.weight_unit || null,
-    total_quantity: variants.inventory_quantity,
-    price: variants.price || null
-  };
-  const allInventory = inventory;
-  var adjust = 0;
-  for(let k in allInventory) {
-    if(allInventory[k].key === key) {
-      adjust = variants.inventory_quantity - allInventory[k].total_quantity;
-      break;
-    }
-  }
-  if(adjust === 0) {
-    fireRef.child('products').child(key).update(update, function(error) {
-      if(error) {
-        dispatch(requestSuccessAction("更新失败！"))
-        console.log(error);
-      };
-    });
-  }
-  else if(adjust > 0) {
-    const variantUpdate = {
-      create_date: product.updated_at,
-      expire_date: expire,
-      quantity: adjust
+  return function(dispatch, getState) {
+    const product = data.product;
+    const variants = product.variants[0];
+    const update = {
+      name: product.title,
+      id: product.id,
+      variant_id: variants.id,
+      images: product.images || null,
+      type: product.product_type || null,
+      tags: product.tags || null,
+      vendor: product.vendor || null,
+      weight: variants.weight || null,
+      weight_unit: variants.weight_unit || null,
+      total_quantity: variants.inventory_quantity,
+      price: variants.price || null
     };
-    fireRef.child('products').child(key).update(update, function(error) {
-      if(error) {
-        dispatch(requestSuccessAction("更新失败！"))
-        console.log(error);
+    const allInventory = inventory;
+    var adjust = 0;
+    for(let k in allInventory) {
+      if(allInventory[k].key === key) {
+        adjust = variants.inventory_quantity - allInventory[k].total_quantity;
+        break;
+      }
+    }
+    if(adjust === 0) {
+      fireRef.child('products').child(key).update(update, function(error) {
+        if(error) {
+          dispatch(requestSuccessAction("更新失败！"))
+          console.log(error);
+        };
+      });
+    }
+    else if(adjust > 0) {
+      const variantUpdate = {
+        create_date: product.updated_at,
+        expire_date: expire,
+        quantity: adjust
       };
-    });
-    fireRef.child('products').child(key).child('stock').push(variantUpdate, function(error) {
-      if(error) {
-        dispatch(requestSuccessAction("更新失败！"))
-        console.log(error);
-      };
-    })
+      fireRef.child('products').child(key).update(update, function(error) {
+        if(error) {
+          dispatch(requestSuccessAction("更新失败！"))
+          console.log(error);
+        };
+      });
+      fireRef.child('products').child(key).child('stock').push(variantUpdate, function(error) {
+        if(error) {
+          dispatch(requestSuccessAction("更新失败！"))
+          console.log(error);
+        };
+      })
+    }
   }
 }
 
@@ -204,10 +208,10 @@ export function addInventory(inventory, expireString) {
     return fetch(path, fetchOptions)
       .then(response => response.json())
       .then(json => {
-        if(key==='') pushToFirebase(json, expire);
-        else updateToFirebase(json, expire, key, getState().all_inventory);
+        if(key==='') dispatch(pushToFirebase(json, expire));
+        else dispatch(updateToFirebase(json, expire, key, getState().all_inventory));
       }).catch(error => {
-        dispatch(requestErrorAction(error));
+        dispatch(requestSuccessAction(error));
       });
   }
 }
