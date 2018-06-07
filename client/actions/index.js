@@ -139,27 +139,29 @@ function updateAllToFirebase(data, cur_products, callback) {
       if(products[i].id===cur_products[j].id) {
         let sub = cur_products[j].total_quantity - products[i].variants[0].inventory_quantity;
         if(sub==0) break;
-        cur_products[j].total_quantity = products[i].variants[0].inventory_quantity;
-        const stock = cur_products[j].stock;
-        const prior = [];
-        for(let k in stock){
-          prior.push([k, stock[k].quantity, stock[k].expire_date]);
-        }
-        prior.sort(function(a, b) {
-          return a[2] - b[2];
-        });
-        for(let c in prior) {
-          if(sub < prior[c][1]) {
-            cur_products[j].stock[prior[c][0]].quantity = prior[c][1] - sub;
-            break;
+        else if(sub>0){
+          cur_products[j].total_quantity = products[i].variants[0].inventory_quantity;
+          const stock = cur_products[j].stock;
+          const prior = [];
+          for(let k in stock){
+            prior.push([k, stock[k].quantity, stock[k].expire_date]);
           }
-          else if(sub == prior[c][1]) {
-            delete cur_products[j].stock[prior[c][0]];
-            break;
-          }
-          else {
-            sub = sub - prior[c][1];
-            delete cur_products[j].stock[prior[c][0]];
+          prior.sort(function(a, b) {
+            return a[2] - b[2];
+          });
+          for(let c in prior) {
+            if(sub < prior[c][1]) {
+              cur_products[j].stock[prior[c][0]].quantity = prior[c][1] - sub;
+              break;
+            }
+            else if(sub == prior[c][1]) {
+              delete cur_products[j].stock[prior[c][0]];
+              break;
+            }
+            else {
+              sub = sub - prior[c][1];
+              delete cur_products[j].stock[prior[c][0]];
+            }
           }
         }
       }
@@ -184,7 +186,7 @@ export function getPresentProductsInfo(callback){
     credentials: 'include',
   };
   return function(dispatch, getState) {
-    return fetch('api/products.json', fetchOptions)
+    return fetch('shopify/api/products.json', fetchOptions)
       .then(response => response.json())
       .then(json => { updateAllToFirebase(json, getState().all_inventory, callback); })
       .catch(error => {alert(error)});
@@ -203,7 +205,7 @@ export function addInventory(inventory, expireString) {
     credentials: 'include',
   };
   fetchOptions.method = key === '' ? 'POST' : 'PUT';
-  const path = key === '' ? 'api/products.json' : 'api/products/' + inventory.id + '.json';
+  const path = key === '' ? 'shopify/api/products.json' : 'shopify/api/products/' + inventory.id + '.json';
   return function(dispatch, getState) {
     return fetch(path, fetchOptions)
       .then(response => response.json())

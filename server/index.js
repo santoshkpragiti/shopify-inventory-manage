@@ -33,9 +33,15 @@ const shopifyConfig = {
   afterAuth(request, response) {
     const { session: { accessToken, shop } } = request;
 
-    registerWebhook(shop, accessToken, {
-      topic: 'app/uninstalled',
-      address: 'https://example-app.com/webhooks/uninstall',
+    registerCartCreateWebhook(shop, accessToken, {
+      topic: 'carts/create',
+      address: `${SHOPIFY_APP_HOST}/cart-create`,
+      format: 'json'
+    });
+
+    registerCartUpdateWebhook(shop, accessToken, {
+      topic: 'carts/update',
+      address: `${SHOPIFY_APP_HOST}/cart-update`,
       format: 'json'
     });
 
@@ -43,9 +49,16 @@ const shopifyConfig = {
   },
 };
 
-const registerWebhook = function(shopDomain, accessToken, webhook) {
-  const shopName = shopDomain.replace('.myshopify.com', '');
-  const shopify = new ShopifyAPIClient({ shopName: shopName, accessToken: accessToken });
+const registerCartCreateWebhook = function(shopDomain, accessToken, webhook) {
+  const shopify = new ShopifyAPIClient({ shopName: shopDomain, accessToken: accessToken });
+  shopify.webhook.create(webhook).then(
+    response => console.log(`webhook '${webhook.topic}' created`),
+    err => console.log(`Error creating webhook '${webhook.topic}'. ${JSON.stringify(err.response.body)}`)
+  );
+}
+
+const registerCartUpdateWebhook = function(shopDomain, accessToken, webhook) {
+  const shopify = new ShopifyAPIClient({ shopName: shopDomain, accessToken: accessToken });
   shopify.webhook.create(webhook).then(
     response => console.log(`webhook '${webhook.topic}' created`),
     err => console.log(`Error creating webhook '${webhook.topic}'. ${JSON.stringify(err.response.body)}`)
@@ -102,10 +115,10 @@ const shopify = ShopifyExpress(shopifyConfig);
 const {routes, middleware} = shopify;
 const {withShop, withWebhook} = middleware;
 
-app.use('/', routes);
+app.use('/shopify', routes);
 
 // Client
-app.get('/', withShop, function(request, response) {
+app.get('/', withShop({authBaseUrl: '/shopify'}), function(request, response) {
   const { session: { shop, accessToken } } = request;
   response.render('app', {
     title: 'Shopify Node App',
@@ -115,11 +128,17 @@ app.get('/', withShop, function(request, response) {
 });
 
 // Webhooks
-app.get('/order-create', withWebhook, (request, response) => {
-  console.log('We got a webhook!');
+app.post('/cart-create', withWebhook((error, request) => {
+  console.log('We got a create webhook!');
   console.log('Details: ', request.webhook);
   console.log('Body:', request.body);
-});
+}));
+
+app.post('/cart-update', withWebhook((error, request) => {
+  console.log('We got a update webhook!');
+  console.log('Details: ', request.webhook);
+  console.log('Body:', request.body);
+}));
 
 // Error Handlers
 app.use(function(req, res, next) {
